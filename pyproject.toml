@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "stable-diffusion-webui"
+version = "0.1.0"
+description = ""
+authors = ["AUTOMATIC1111"]
+readme = "README.md"
+packages = [{include = "stable_diffusion_webui"}]
+
+[tool.poetry.dependencies]
+python = "~3.10"
+basicsr = "^1.4.2"
+diffusers = "^0.3.0"
+fairscale = "0.4.9"
+fonts = "^0.0.3"
+font-roboto = "^0.0.1"
+gfpgan = {git = "https://github.com/TencentARC/GFPGAN.git", rev = "8d2447a2d918f8eba5a4a01463fd48e45126a379"}
+gradio = "^3.4"
+invisible-watermark = "^0.1.5"
+k-diffusion = {git = "https://github.com/crowsonkb/k-diffusion.git", rev = "1a0703dfb7d24d8806267c3e7ccc4caf67fd1331"}
+numpy = "^1.23.3"
+omegaconf = "^2.2.3"
+piexif = "^1.1.3"
+Pillow = "^9.2.0"
+pytorch-lightning = "^1.7.6"
+realesrgan = "^0.3.0"
+scikit-image = ">=0.19"
+#timm = "0.4.12"
+timm = "0.6.7"
+transformers = "^4.19.2"
+#torch = "^1.12.1"
+torch = [
+	{ version="1.12.1" },
+	{ url = "https://download.pytorch.org/whl/cu113/torch-1.12.1%2Bcu113-cp310-cp310-linux_x86_64.whl", markers = "python_version ~= '3.10' and sys_platform == 'linux'" }
+]
+torchvision = [
+	{ version="0.13.1" },
+	{ url = "https://download.pytorch.org/whl/cu113/torchvision-0.13.1%2Bcu113-cp310-cp310-linux_x86_64.whl", markers = "python_version ~= '3.10' and sys_platform == 'linux'" }
+]
+scipy = "^1.9.1"
+clean-fid = "^0.1.31"
+ftfy = "^6.1.1"
+opencv-python = "^4.6.0.66"
+PyYAML = "^6.0"
+tb-nightly = "^2.11.0a20220927"
+yapf = "^0.32.0"
+lpips = "^0.1.4"
+gdown = "^4.5.1"
+lmdb = "^1.3.0"
+future = "^0.18.2"
+addict = "^2.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
