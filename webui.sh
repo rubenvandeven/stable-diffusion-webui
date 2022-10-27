@@ -41,6 +41,11 @@ then
     venv_dir="venv"
 fi
 
+if [[ -z "${LAUNCH_SCRIPT}" ]]
+then
+    LAUNCH_SCRIPT="launch.py"
+fi
+
 # Disable sentry logging
 export ERROR_REPORTING=FALSE
 
@@ -77,8 +82,8 @@ then
     clone_dir="${PWD##*/}"
 fi
 
-# Check prequisites
-for preq in git python3
+# Check prerequisites
+for preq in "${GIT}" "${python_cmd}"
 do
     if ! hash "${preq}" &>/dev/null
     then
@@ -133,4 +138,4 @@ fi
 printf "\n%s\n" "${delimiter}"
 printf "Launching launch.py..."
 printf "\n%s\n" "${delimiter}"
-"${python_cmd}" launch.py
+"${python_cmd}" "${LAUNCH_SCRIPT}" "$@"

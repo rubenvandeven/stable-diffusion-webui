@@ -23,18 +23,24 @@ def process_batch(p, input_dir, output_dir, args):
 
     print(f"Will process {len(images)} images, creating {p.n_iter * p.batch_size} new images for each.")
 
+    save_normally = output_dir == ''
+
     p.do_not_save_grid = True
-    p.do_not_save_samples = True
+    p.do_not_save_samples = not save_normally
 
     state.job_count = len(images) * p.n_iter
 
     for i, image in enumerate(images):
         state.job = f"{i+1} out of {len(images)}"
+        if state.skipped:
+            state.skipped = False
 
         if state.interrupted:
             break
 
         img = Image.open(image)
+        # Use the EXIF orientation of photos taken by smartphones.
+        img = ImageOps.exif_transpose(img) 
         p.init_images = [img] * p.batch_size
 
         proc = modules.scripts.scripts_img2img.run(p, *args)
@@ -48,7 +54,8 @@ def process_batch(p, input_dir, output_dir, args):
                 left, right = os.path.splitext(filename)
                 filename = f"{left}-{n}{right}"
 
-            processed_image.save(os.path.join(output_dir, filename))
+            if not save_normally:
+                processed_image.save(os.path.join(output_dir, filename))
 
 
 def img2img(mode: int, prompt: str, negative_prompt: str, prompt_style: str, prompt_style2: str, init_img, init_img_with_mask, init_img_inpaint, init_mask_inpaint, mask_mode, steps: int, sampler_index: int, mask_blur: int, inpainting_fill: int, restore_faces: bool, tiling: bool, n_iter: int, batch_size: int, cfg_scale: float, denoising_strength: float, seed: int, subseed: int, subseed_strength: float, seed_resize_from_h: int, seed_resize_from_w: int, seed_enable_extras: bool, height: int, width: int, resize_mode: int, inpaint_full_res: bool, inpaint_full_res_padding: int, inpainting_mask_invert: int, img2img_batch_input_dir: str, img2img_batch_output_dir: str, *args):
@@ -56,18 +63,24 @@ def img2img(mode: int, prompt: str, negative_prompt: str, prompt_style: str, pro
     is_batch = mode == 2
 
     if is_inpaint:
+        # Drawn mask
         if mask_mode == 0:
             image = init_img_with_mask['image']
             mask = init_img_with_mask['mask']
             alpha_mask = ImageOps.invert(image.split()[-1]).convert('L').point(lambda x: 255 if x > 0 else 0, mode='1')
             mask = ImageChops.lighter(alpha_mask, mask.convert('L')).convert('L')
             image = image.convert('RGB')
+        # Uploaded mask
         else:
             image = init_img_inpaint
             mask = init_mask_inpaint
+    # No mask
     else:
         image = init_img
         mask = None
+
+    # Use the EXIF orientation of photos taken by smartphones.
+    image = ImageOps.exif_transpose(image) 
 
     assert 0. <= denoising_strength <= 1., 'can only work with strength in [0.0, 1.0]'
 
@@ -103,7 +116,12 @@ def img2img(mode: int, prompt: str, negative_prompt: str, prompt_style: str, pro
         inpaint_full_res_padding=inpaint_full_res_padding,
         inpainting_mask_invert=inpainting_mask_invert,
     )
-    print(f"\nimg2img: {prompt}", file=shared.progress_print_out)
+
+    p.scripts = modules.scripts.scripts_txt2img
+    p.script_args = args
+
+    if shared.cmd_opts.enable_console_prompts:
+        print(f"\nimg2img: {prompt}", file=shared.progress_print_out)
 
     p.extra_generation_params["Mask blur"] = mask_blur
 
@@ -123,5 +141,8 @@ def img2img(mode: int, prompt: str, negative_prompt: str, prompt_style: str, pro
     generation_info_js = processed.js()
     if opts.samples_log_stdout:
         print(generation_info_js)
+
+    if opts.do_not_show_images:
+        processed.images = []
 
     return processed.images, generation_info_js, plaintext_to_html(processed.info)
