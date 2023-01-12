@@ -3,6 +3,8 @@ A browser interface based on Gradio library for Stable Diffusion.
 
 **This fork uses poetry (optionally in combination with pyenv) and git submodules to instal deps**
 
+Run it with `poetry run python webui.py --listen --ckpt models/Stable-diffusion/sd-v1.4.ckpt `
+
 ![](txt2img_Screenshot.png)
 
 Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts) wiki page for extra scripts developed by users.
